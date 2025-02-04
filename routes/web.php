@@ -1,7 +1,7 @@
 <?php
 
+use App\Http\Controllers\DrawController;
 use Illuminate\Support\Facades\Route;
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [DrawController::class, 'user']);
+Route::get('/admin', [DrawController::class, 'admin']);
