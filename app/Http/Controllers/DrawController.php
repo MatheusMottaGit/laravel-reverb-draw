@@ -29,8 +29,4 @@ class DrawController extends Controller
             'message' => "$nickname joined the room!" . ($isAdmin ? "(Administrador)." : "")
         ]);
     }
-
-    public function start() {
-        $participants = Cache::get('participants');
-    }
 }

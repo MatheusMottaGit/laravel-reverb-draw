@@ -24,6 +24,6 @@ class UserJoined implements ShouldBroadcast
 
     public function broadcastOn()
     {
-        return new PresenceChannel('draw');
+        return new Channel('draw');
     }
 }

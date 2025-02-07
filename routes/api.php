@@ -1,5 +1,6 @@
 <?php
 
+use App\Events\TestEvent;
 use App\Http\Controllers\DrawController;
 use Illuminate\Support\Facades\Route;
 
