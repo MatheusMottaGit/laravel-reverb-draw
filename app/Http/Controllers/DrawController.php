@@ -51,9 +51,21 @@ class DrawController extends Controller
             
             broadcast(new DrawStarted($winner));
 
-            return response()->json(['message' => 'We have a winner!']);
+            return response()->json(['message' => 'We have a winner! $winner']);
         }else {
             return response()->json(['message' => 'The room is not full yet.']);
+        }
+    }
+
+    public function restart() {
+        $participants = Cache::get('participants');
+
+        if(!empty($participants)) {
+            Cache::delete('participants');
+
+            return response()->json(['message' => 'Room cleaned.']);
+        }else{
+            return response()->json(['message' => 'Room is empty.', 400]);
         }
     }
 }
