@@ -26,4 +26,10 @@ class UserJoined implements ShouldBroadcast
     {
         return new Channel('draw'); // PresenceChannel needs authentication
     }
+
+    public function broadcastWith() {
+        return [
+            'nickname' => $this->nickname
+        ];
+    }
 }

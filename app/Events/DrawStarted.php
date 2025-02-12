@@ -23,4 +23,10 @@ class DrawStarted implements ShouldBroadcast
     {
         return new Channel('draw');
     }
+
+    public function broadcastWith() {
+        return [
+            'winner' => $this->winner
+        ];
+    }
 }

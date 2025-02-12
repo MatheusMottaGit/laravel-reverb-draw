@@ -24,13 +24,12 @@ class DrawController extends Controller
             return $participant !== "admin123";
         });
         
-        if (count($onlyUsers) > env('MAX_PARTICIPANTS_COUNT')) {
-            return response()->json(['message' => "The room is full."]);
+        if (count($onlyUsers) >= env('MAX_PARTICIPANTS_COUNT')) {
+            return response()->json(['message' => "The room is full."], 400);
         }
 
         $participants[] = $nickname;
-        
-        Cache::put('participants', $participants, now()->addMinutes(10));
+        Cache::put('participants', $participants);
 
         broadcast(new UserJoined($nickname, $participants));
 
@@ -40,32 +39,31 @@ class DrawController extends Controller
     }
 
     public function start() {
-        $participants = Cache::get('participants');
+        $participants = Cache::get('participants', []);
 
         $onlyUsers = array_filter($participants, function($participant) {
-            return $participant !== "admin123";
+            return $participant !== "admin123";   
         });
 
-        if(count($onlyUsers) === env("MAX_PARTICIPANTS_COUNT")) {
+        if (count($onlyUsers) >= env('MAX_PARTICIPANTS_COUNT')) {
             $winner = $onlyUsers[array_rand($onlyUsers)];
-            
+
             broadcast(new DrawStarted($winner));
 
-            return response()->json(['message' => 'We have a winner! $winner']);
-        }else {
-            return response()->json(['message' => 'The room is not full yet.']);
+            return response()->json(['message' => "We have a winner! $winner"]);
         }
+
+        return response()->json(['message' => "Room is not full yet."], 400);
     }
 
     public function restart() {
-        $participants = Cache::get('participants');
+        $participants = Cache::get('participants', []);
 
-        if(!empty($participants)) {
-            Cache::delete('participants');
-
-            return response()->json(['message' => 'Room cleaned.']);
-        }else{
-            return response()->json(['message' => 'Room is empty.', 400]);
+        if (!empty($participants)) {
+            Cache::forget('participants');
+            return response()->json(['message' => "Room cleaned."]);
         }
+
+        return response()->json(['message' => "Room is empty."], 400);
     }
 }
