@@ -1,66 +1,86 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+# Draw System API Documentation
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+## Overview
+This API provides endpoints for managing a real-time draw system where users can join a room, participate in a draw, and restart the process. The system uses WebSocket broadcasting for real-time updates.
 
-## About Laravel
+## API Endpoints
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+### 1. Enter Room
+- **Endpoint:** `POST /api/enter`
+- **Description:** Allows a user to enter the draw room
+- **Request Body:**
+  ```json
+  {
+    "nickname": "string"
+  }
+  ```
+- **Responses:**
+  - 200 OK: User successfully joined
+    ```json
+    {
+      "message": "User joined the room!"
+    }
+    ```
+  - 400 Bad Request: If nickname is already taken or room is full
+    ```json
+    {
+      "message": "This nickname is already in the room."
+    }
+    ```
+    or
+    ```json
+    {
+      "message": "The room is full."
+    }
+    ```
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+### 2. Start Draw
+- **Endpoint:** `POST /api/start`
+- **Description:** Initiates the draw process when the room is full
+- **Responses:**
+  - 200 OK: Draw completed successfully
+    ```json
+    {
+      "message": "We have a winner! [winner_name]"
+    }
+    ```
+  - 400 Bad Request: If room is not full
+    ```json
+    {
+      "message": "Room is not full yet."
+    }
+    ```
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+### 3. Restart Draw
+- **Endpoint:** `POST /api/restart`
+- **Description:** Clears the room and allows for a new draw session
+- **Responses:**
+  - 200 OK: Room cleared successfully
+    ```json
+    {
+      "message": "Room cleaned."
+    }
+    ```
+  - 400 Bad Request: If room is already empty
+    ```json
+    {
+      "message": "Room is empty."
+    }
+    ```
 
-## Learning Laravel
+## Real-time Events
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+The system broadcasts the following events on the 'draw' channel:
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+1. **UserJoined Event**
+   - Triggered when a new user joins the room
+   - Payload includes the new user's nickname and updated participants list
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains thousands of video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+2. **DrawStarted Event**
+   - Triggered when the draw is initiated
+   - Payload includes the winner's name
 
-## Laravel Sponsors
-
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the [Laravel Partners program](https://partners.laravel.com).
-
-### Premium Partners
-
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[WebReinvent](https://webreinvent.com/)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[DevSquad](https://devsquad.com/hire-laravel-developers)**
-- **[Jump24](https://jump24.co.uk)**
-- **[Redberry](https://redberry.international/laravel/)**
-- **[Active Logic](https://activelogic.com)**
-- **[byte5](https://byte5.de)**
-- **[OP.GG](https://op.gg)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
+## Special Notes
+- The system has a maximum participant limit (configurable via `MAX_PARTICIPANTS_COUNT` environment variable)
+- There is a special admin user with the nickname "admin123"
+- The system uses Laravel's cache system to maintain the state of participants
